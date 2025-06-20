@@ -38,7 +38,7 @@ function AppContent() {
           <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-primary-700 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-large">
             <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
           </div>
-          <h2 className="text-xl font-bold text-neutral-900 mb-2">Loading ISDC Assistant</h2>
+          <h2 className="text-xl font-bold text-neutral-900 mb-2">Loading AI Email Assistant</h2>
           <p className="text-neutral-600">Connecting to your workspace...</p>
         </motion.div>
       </div>

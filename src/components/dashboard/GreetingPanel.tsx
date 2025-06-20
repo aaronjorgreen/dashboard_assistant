@@ -35,7 +35,7 @@ export function GreetingPanel() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: `Good evening${state.user?.name ? `, ${state.user.name.split(' ')[0]}` : ''}! I've analyzed your inbox and found ${state.emails.filter(e => !e.isRead).length} high-priority emails requiring your attention. Would you like me to summarize them?`,
+      content: `Welcome back${state.user?.name ? `, ${state.user.name.split(' ')[0]}` : ''}! Your assistant is ready. There are ${state.emails.filter(e => !e.isRead).length} unread emails that may need your review. Would you like me to summarize them?`,
       sender: 'ai',
       timestamp: new Date(),
     }
