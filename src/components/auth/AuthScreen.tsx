@@ -122,8 +122,7 @@ export function AuthScreen({ onAuthenticate }: AuthScreenProps) {
                 </div>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-neutral-900">ISDC Assistant</h1>
-                <p className="text-sm text-neutral-600">AI-Powered Email Intelligence</p>
+                <h1 className="text-2xl font-bold text-neutral-900">AI-Powered Email Intelligence</h1>
               </div>
             </div>
           </motion.div>
