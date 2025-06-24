@@ -42,7 +42,7 @@ export class AIEmailAssistant {
         messages: [
           {
             role: 'system',
-            content: `You are the AI Email Assistant for Vertex Vista. Your job is to analyze incoming emails and return a clear JSON with: summary, sentiment, priority, key topics, action items, urgency (1–10), and a suggested reply. Respond only in valid JSON.`,
+            content: `You are the AI Email Assistant for Vertex Vista. Analyze incoming emails and return only valid JSON with: summary, sentiment, priority, key topics, action items, urgency (1–10), and a suggested reply. No extra explanation.`,
           },
           { role: 'user', content: prompt },
         ],
@@ -70,15 +70,14 @@ Subject: ${email.subject}
 From: ${email.sender}
 Body: ${email.body}
 
-Reply on behalf of a team member at Vertex Vista. Keep it short, polite, and relevant. No need for subject line.
+Reply as someone from Vertex Vista. Keep it short, helpful, and clear. No subject line needed.
       `;
       const completion = await openai.chat.completions.create({
         model: 'gpt-4-turbo-preview',
         messages: [
           {
             role: 'system',
-            content:
-              'You are the AI Email Assistant for Vertex Vista. Your job is to write short, polite, and relevant email replies with a professional tone.',
+            content: 'You are the AI Email Assistant for Vertex Vista. Draft polite and helpful replies in 3–5 clear sentences.',
           },
           { role: 'user', content: prompt },
         ],
@@ -86,20 +85,17 @@ Reply on behalf of a team member at Vertex Vista. Keep it short, polite, and rel
         max_tokens: 500,
       });
 
-      return completion.choices[0]?.message?.content || 'Unable to generate reply.';
+      return this.clean(completion.choices[0]?.message?.content || 'Unable to generate reply.');
     } catch (err) {
       console.error('Error generating response:', err);
-      return 'Thank you for your email. I’ll follow up shortly.';
+      return 'Thanks for your message — I’ll get back to you shortly.';
     }
   }
 
   async summarizeEmails(emails: EmailContext[]): Promise<string> {
     try {
       const summaryString = emails
-        .map(
-          (e) =>
-            `From: ${e.sender}\nSubject: ${e.subject}\nBody: ${e.body.substring(0, 200)}...`
-        )
+        .map((e) => `From: ${e.sender}\nSubject: ${e.subject}\nBody: ${e.body.substring(0, 200)}...`)
         .join('\n\n---\n\n');
 
       const completion = await openai.chat.completions.create({
@@ -107,8 +103,7 @@ Reply on behalf of a team member at Vertex Vista. Keep it short, polite, and rel
         messages: [
           {
             role: 'system',
-            content:
-              'You are the AI Email Assistant for Vertex Vista. Your task is to give a short, sharp summary of unread emails: highlight important senders, urgent topics, or action items. Be concise.',
+            content: 'You are the AI Email Assistant. Give a short, useful summary of unread emails. Bullet points preferred. Skip fluff.',
           },
           {
             role: 'user',
@@ -119,7 +114,7 @@ Reply on behalf of a team member at Vertex Vista. Keep it short, polite, and rel
         max_tokens: 800,
       });
 
-      return completion.choices[0]?.message?.content || 'No summary generated.';
+      return this.clean(completion.choices[0]?.message?.content || 'No summary generated.');
     } catch (err) {
       console.error('Error summarizing emails:', err);
       return 'Unable to generate summary.';
@@ -129,88 +124,22 @@ Reply on behalf of a team member at Vertex Vista. Keep it short, polite, and rel
   async chatWithAI(message: string, context?: string): Promise<string> {
     try {
       const systemPrompt = `
-SYSTEM PROMPT – Vertex Vista AI Email Assistant
+You are the AI Email Assistant for Vertex Vista — a high-performance AI automation agency.
 
-You are the AI Email Assistant for Vertex Vista, a high-performance AI automation agency. You live inside the user's inbox. Your job is to help them move faster and smarter through daily email tasks without sounding robotic.
+You help users manage their inbox faster:
+- Summarize emails in bullet points
+- Draft short, sharp replies
+- Spot urgent or important actions
+- Suggest helpful next steps
+- Keep tone friendly, clear, human
 
-CORE PURPOSE:
-Respond like a smart, helpful executive assistant who:
+Style rules:
+- Replies = 3–5 sentences max
+- Use bullet points when possible
+- Never use *markdown* or overformatting
+- Sound like a smart colleague, not a chatbot
+- Skip fluff and headers — just be helpful
 
-Summarizes emails clearly in bullet points
-
-Drafts concise replies (no essays, no fluff)
-
-Highlights urgent emails or actions
-
-Extracts tasks, deadlines, and scheduling needs
-
-Spots patterns, blockers, or valuable business insights in conversations
-
-PERSONALITY & TONE:
-
-Friendly but professional
-
-Calm, clear, helpful
-
-Conversational — like texting a smart colleague
-
-Confident, not overly formal or timid
-
-Use plain language — avoid buzzwords and excessive pleasantries
-REPLY WRITING STYLE:
-
-Mirror sender tone when helpful (friendly, casual, sharp)
-
-Keep replies to 3–5 short sentences max
-
-Assume the user wants to move fast
-
-If unsure how to reply, suggest 2–3 options in bullet format
-
-BOUNDARIES:
-
-Don’t repeat the full contents of an email unless asked
-
-Never apologize unless it’s part of a drafted reply
-
-Don’t speculate — ask for clarification if necessary
-
-Don’t overthink – clarity over cleverness
-
-EXAMPLES:
-
-Draft Reply Style
-"Sounds good — happy to move forward. Just let me know what you need from our end.
-RESPONSE RULES:
-
-No how-to guides
-
-No step-by-step formatting
-
-No overexplaining
-
-No headers like “Certainly!” or “Here’s how to…”
-
-Don’t speak in generalities — respond directly to the email context
-
-Draft replies must sound human, not like a chatbot or manual
-
-Keep every reply smart, sharp, and useful — no filler
-
-STYLE GUIDE:
-
-Short, clear, helpful
-
-Max 3–5 sentences for replies
-
-Bullet points for actions
-
-Use plain language
-
-Match sender’s tone if helpful, but never overdo it
-
-If the email is vague or unclear, suggest 2–3 short reply options in bullet format.
-Only give clear, short, well-formatted outputs in markdown format if needed. Speak like a helpful colleague. Never explain how to reply — just reply.
 ${context ? `Context: ${context}` : ''}
       `;
 
@@ -224,7 +153,7 @@ ${context ? `Context: ${context}` : ''}
         max_tokens: 800,
       });
 
-      return completion.choices[0]?.message?.content || 'No answer generated.';
+      return this.clean(completion.choices[0]?.message?.content || 'No answer generated.');
     } catch (err) {
       console.error('Error in AI chat:', err);
       return 'Sorry, I wasn’t able to help with that just now.';
@@ -233,18 +162,15 @@ ${context ? `Context: ${context}` : ''}
 
   private buildAnalysisPrompt(email: EmailContext): string {
     return `
-Analyze the email below and return a response in this JSON format:
-{
-  "summary": "",
-  "sentiment": "positive|neutral|negative",
-  "priority": "high|medium|low",
-  "actionItems": [],
-  "suggestedResponse": "",
-  "keyTopics": [],
-  "urgency": 5
-}
+Analyze the following email and return valid JSON with:
+- summary
+- sentiment
+- priority
+- keyTopics[]
+- actionItems[]
+- urgency (1–10)
+- suggestedResponse
 
-Email:
 Subject: ${email.subject}
 From: ${email.sender}
 Body: ${email.body}
@@ -262,6 +188,13 @@ Date: ${email.timestamp.toISOString()}
       keyTopics: ['general'],
       urgency: 5,
     };
+  }
+
+  private clean(raw: string): string {
+    return raw
+      .replace(/\*/g, '') // remove markdown asterisks
+      .replace(/^\s*[\-\•]\s?/gm, '• ') // format bullet points
+      .trim();
   }
 }
 
