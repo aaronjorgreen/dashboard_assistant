@@ -38,6 +38,14 @@ export function EmailWorkspace() {
     setStatusMessage("✅ Sync complete.");
   };
 
+  if (!user) {
+    return (
+      <div className="text-center p-6 text-muted-foreground">
+        Loading user...
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       <h2 className="text-2xl font-semibold">📥 Email Workspace</h2>
@@ -76,7 +84,7 @@ export function EmailWorkspace() {
         {statusMessage && <p className="text-sm text-muted-foreground pt-2">{statusMessage}</p>}
       </Card>
 
-      {hasGmailConnection && <EmailView />}
+      {hasGmailConnection ? <EmailView /> : <p className="text-center text-muted-foreground">Connect Gmail to view emails.</p>}
     </div>
   );
 }
