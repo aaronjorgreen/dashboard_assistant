@@ -76,7 +76,7 @@ export function Dashboard() {
                 <Bell className="w-5 h-5 text-neutral-600" />
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-error-500 rounded-full"></div>
               </Button>
-              
+
               {/* User Menu */}
               <div className="flex items-center space-x-3 pl-3 border-l border-neutral-200">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center shadow-medium">
@@ -102,11 +102,11 @@ export function Dashboard() {
                 <button
                   key={item.id}
                   onClick={() => setCurrentView(item.id as any)}
-                  className={flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                  className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
                     currentView === item.id
                       ? 'bg-white text-primary-700 shadow-medium border border-primary-200/50'
                       : 'text-neutral-600 hover:text-neutral-900 hover:bg-white/50'
-                  }}
+                  }`}
                 >
                   <item.icon className="w-4 h-4" />
                   <span>{item.label}</span>
