@@ -1,5 +1,3 @@
-// UPDATED AIAssistant.tsx – Fixed layout for scrollable chat only, persistent input/footer
-
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, Send, Volume2, Activity } from 'lucide-react';
@@ -18,9 +16,7 @@ export function AIAssistant() {
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -71,8 +67,8 @@ export function AIAssistant() {
   };
 
   return (
-    <div className="h-screen flex">
-      <div className="w-1/4 border-r border-neutral-200 p-4 space-y-4">
+    <div className="h-screen min-h-screen flex overflow-hidden">
+      <div className="w-1/4 border-r border-neutral-200 p-4 space-y-4 bg-white">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Bot className="w-5 h-5" /> AI Functions
         </h2>
@@ -82,7 +78,7 @@ export function AIAssistant() {
         </Button>
       </div>
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col bg-white">
         <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Bot className="w-6 h-6 text-success-600" />
@@ -94,7 +90,7 @@ export function AIAssistant() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-4 bg-white">
+        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-4">
           <AnimatePresence>
             {messages.map((msg) => (
               <motion.div
@@ -104,7 +100,7 @@ export function AIAssistant() {
                 exit={{ opacity: 0, y: -10 }}
                 className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <Card className={`max-w-md p-4 shadow-md ${msg.sender === 'user' ? 'bg-primary-100 text-black' : 'bg-white text-neutral-900'}`}>
+                <Card className={`max-w-md p-4 shadow-sm ${msg.sender === 'user' ? 'bg-primary-100 text-black' : 'bg-white text-neutral-900'}`}>
                   <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                 </Card>
               </motion.div>
