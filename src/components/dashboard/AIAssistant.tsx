@@ -1,8 +1,6 @@
-// UPDATED AIAssistant.tsx - With styling fix, prompt improvements, and "Summarize Unread" action wired
-
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, Send, Mic, Volume2, VolumeX, User, Sparkles, Layers, Activity } from 'lucide-react';
+import { Bot, Send, Volume2, Activity } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -15,6 +13,11 @@ export function AIAssistant() {
   const [inputValue, setInputValue] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -24,20 +27,19 @@ export function AIAssistant() {
       content: inputValue,
       sender: 'user',
       timestamp: new Date(),
-      type: 'text'
+      type: 'text',
     };
     setMessages((prev) => [...prev, userMessage]);
-    setIsProcessing(true);
     setInputValue('');
+    setIsProcessing(true);
 
     const aiReply = await aiAssistant.chatWithAI(userMessage.content);
-
     const aiMessage = {
       id: Date.now().toString() + '-ai',
       content: aiReply,
       sender: 'ai',
       timestamp: new Date(),
-      type: 'text'
+      type: 'text',
     };
     setMessages((prev) => [...prev, aiMessage]);
     setIsProcessing(false);
@@ -45,7 +47,7 @@ export function AIAssistant() {
 
   const handleSummarizeUnread = async () => {
     setIsProcessing(true);
-    const unreadEmails = state.emails.filter(e => !e.isRead);
+    const unreadEmails = state.emails.filter((e) => !e.isRead);
     const summary = await aiAssistant.summarizeEmails(unreadEmails);
 
     const aiMessage = {
@@ -53,25 +55,28 @@ export function AIAssistant() {
       content: summary,
       sender: 'ai',
       timestamp: new Date(),
-      type: 'summary'
+      type: 'summary',
     };
-    setMessages(prev => [...prev, aiMessage]);
+    setMessages((prev) => [...prev, aiMessage]);
     setIsProcessing(false);
   };
 
   return (
     <div className="h-full bg-white flex">
+      {/* Sidebar */}
       <div className="w-1/4 border-r border-neutral-200 p-4 space-y-4">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Bot className="w-5 h-5" /> AI Functions
         </h2>
-        <p className="text-sm text-neutral-500">Ask me anything or run a quick action</p>
+        <p className="text-sm text-neutral-500">Ask anything or run a quick action</p>
         <Button onClick={handleSummarizeUnread} className="w-full">
           Summarize Unread
         </Button>
       </div>
 
+      {/* Chat Area */}
       <div className="flex-1 flex flex-col">
+        {/* Header */}
         <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Bot className="w-6 h-6 text-success-600" />
@@ -83,6 +88,7 @@ export function AIAssistant() {
           </div>
         </div>
 
+        {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           <AnimatePresence>
             {messages.map((msg) => (
@@ -93,18 +99,26 @@ export function AIAssistant() {
                 exit={{ opacity: 0, y: -10 }}
                 className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <Card className={`max-w-md p-4 shadow-md ${msg.sender === 'user' ? 'bg-primary-600 text-black' : 'bg-white text-neutral-900'}`}>
-                  <p className={`text-sm ${msg.sender === 'user' ? 'text-black' : 'text-neutral-900'}`}>{msg.content}</p>
+                <Card
+                  className={`max-w-md p-4 shadow-md whitespace-pre-wrap ${
+                    msg.sender === 'user'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-white text-neutral-900'
+                  }`}
+                >
+                  <p className="text-sm">{msg.content}</p>
                 </Card>
               </motion.div>
             ))}
           </AnimatePresence>
+          <div ref={messagesEndRef} />
         </div>
 
+        {/* Input */}
         <div className="p-4 border-t border-neutral-200">
           <div className="flex items-center gap-2">
             <Input
-              placeholder="Ask something smart..."
+              placeholder="Ask your AI assistant..."
               value={inputValue}
               onChange={(val) => setInputValue(val)}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
