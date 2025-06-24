@@ -79,3 +79,4 @@ export class EmailSyncEngine {
 export const createEmailSync = (userId: string, onProgress?: (msg: string) => void) => {
   return new EmailSyncEngine(userId, onProgress);
 } 
+
