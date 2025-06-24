@@ -1,4 +1,4 @@
-// UPDATED AIAssistant.tsx - Now fully connected to OpenAI logic
+// UPDATED AIAssistant.tsx - With styling fix, prompt improvements, and "Summarize Unread" action wired
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -43,13 +43,32 @@ export function AIAssistant() {
     setIsProcessing(false);
   };
 
+  const handleSummarizeUnread = async () => {
+    setIsProcessing(true);
+    const unreadEmails = state.emails.filter(e => !e.isRead);
+    const summary = await aiAssistant.summarizeEmails(unreadEmails);
+
+    const aiMessage = {
+      id: Date.now().toString() + '-summary',
+      content: summary,
+      sender: 'ai',
+      timestamp: new Date(),
+      type: 'summary'
+    };
+    setMessages(prev => [...prev, aiMessage]);
+    setIsProcessing(false);
+  };
+
   return (
     <div className="h-full bg-white flex">
-      <div className="w-1/4 border-r border-neutral-200 p-4">
+      <div className="w-1/4 border-r border-neutral-200 p-4 space-y-4">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Bot className="w-5 h-5" /> AI Functions
         </h2>
-        <p className="text-sm text-neutral-500">Ask me anything about your inbox</p>
+        <p className="text-sm text-neutral-500">Ask me anything or run a quick action</p>
+        <Button onClick={handleSummarizeUnread} className="w-full">
+          Summarize Unread
+        </Button>
       </div>
 
       <div className="flex-1 flex flex-col">
@@ -74,8 +93,8 @@ export function AIAssistant() {
                 exit={{ opacity: 0, y: -10 }}
                 className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <Card className={`max-w-md ${msg.sender === 'user' ? 'bg-primary-600 text-white' : 'bg-white text-neutral-900'} p-4 shadow-md`}>
-                  <p className="text-sm">{msg.content}</p>
+                <Card className={`max-w-md p-4 shadow-md ${msg.sender === 'user' ? 'bg-primary-600 text-white' : 'bg-white text-neutral-900'}`}>
+                  <p className={`text-sm ${msg.sender === 'user' ? 'text-white' : 'text-neutral-900'}`}>{msg.content}</p>
                 </Card>
               </motion.div>
             ))}
