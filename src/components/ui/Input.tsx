@@ -49,10 +49,10 @@ export function Input({
           placeholder={placeholder}
           disabled={disabled}
           className={`
-            block w-full rounded-2xl border-2 border-neutral-200 px-4 py-3 text-neutral-900 placeholder-neutral-500 transition-all duration-300
+            block w-full rounded-2xl border-2 border-neutral-200 px-4 py-3 text-neutral-900 placeholder-neutral-500 transition-all duration-300 backdrop-blur-sm
             focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 focus:outline-none
             disabled:bg-neutral-50 disabled:text-neutral-500 disabled:cursor-not-allowed
-            hover:border-neutral-300
+            hover:border-neutral-300 bg-white/80
             ${Icon ? 'pl-12' : ''}
             ${error ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10' : ''}
           `}

@@ -27,19 +27,19 @@ export function Button({
   className = '',
   type = 'button',
 }: ButtonProps) {
-  const baseClasses = 'inline-flex items-center justify-center font-semibold rounded-2xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 relative overflow-hidden';
+  const baseClasses = 'inline-flex items-center justify-center font-semibold rounded-2xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 relative overflow-hidden backdrop-blur-sm';
   
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 focus:ring-primary-500 shadow-medium hover:shadow-large',
-    secondary: 'bg-gradient-to-r from-neutral-600 to-neutral-700 text-white hover:from-neutral-700 hover:to-neutral-800 focus:ring-neutral-500 shadow-medium hover:shadow-large',
-    outline: 'border-2 border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300 focus:ring-primary-500 bg-white',
-    ghost: 'text-neutral-700 hover:bg-neutral-100 focus:ring-primary-500',
+    primary: 'bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 focus:ring-primary-500 shadow-medium hover:shadow-large border border-primary-600/20',
+    secondary: 'bg-gradient-to-r from-neutral-600 to-neutral-700 text-white hover:from-neutral-700 hover:to-neutral-800 focus:ring-neutral-500 shadow-medium hover:shadow-large border border-neutral-600/20',
+    outline: 'border-2 border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300 focus:ring-primary-500 bg-white/80 backdrop-blur-sm shadow-soft hover:shadow-medium',
+    ghost: 'text-neutral-700 hover:bg-neutral-100/80 focus:ring-primary-500 backdrop-blur-sm',
   };
 
   const sizeClasses = {
-    sm: 'px-3 py-2 text-sm',
-    md: 'px-4 py-2.5 text-sm',
-    lg: 'px-6 py-3 text-base',
+    sm: 'px-4 py-2.5 text-sm',
+    md: 'px-5 py-3 text-sm',
+    lg: 'px-7 py-4 text-base',
   };
 
   const disabledClasses = disabled || loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer';
@@ -50,7 +50,7 @@ export function Button({
       onClick={onClick}
       disabled={disabled || loading}
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${disabledClasses} ${className}`}
-      whileHover={!disabled && !loading ? { scale: 1.02 } : {}}
+      whileHover={!disabled && !loading ? { scale: 1.02, y: -1 } : {}}
       whileTap={!disabled && !loading ? { scale: 0.98 } : {}}
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
     >
