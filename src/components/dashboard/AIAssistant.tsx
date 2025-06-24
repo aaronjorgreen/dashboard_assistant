@@ -1,6 +1,6 @@
-// Final Optimized AIAssistant.tsx
+// UPDATED AIAssistant.tsx – Fixed layout for scrollable chat only, persistent input/footer
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, Send, Volume2, Activity } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
@@ -15,12 +15,16 @@ export function AIAssistant() {
   const [inputValue, setInputValue] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = () => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    scrollToBottom();
   }, [messages]);
 
   const handleSendMessage = async () => {
@@ -67,8 +71,7 @@ export function AIAssistant() {
   };
 
   return (
-    <div className="h-full flex bg-white">
-      {/* Sidebar */}
+    <div className="h-screen flex">
       <div className="w-1/4 border-r border-neutral-200 p-4 space-y-4">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Bot className="w-5 h-5" /> AI Functions
@@ -79,9 +82,7 @@ export function AIAssistant() {
         </Button>
       </div>
 
-      {/* Main Chat Panel */}
       <div className="flex-1 flex flex-col">
-        {/* Header */}
         <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Bot className="w-6 h-6 text-success-600" />
@@ -93,8 +94,7 @@ export function AIAssistant() {
           </div>
         </div>
 
-        {/* Messages */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-4 bg-white">
           <AnimatePresence>
             {messages.map((msg) => (
               <motion.div
@@ -104,16 +104,16 @@ export function AIAssistant() {
                 exit={{ opacity: 0, y: -10 }}
                 className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <Card className={`max-w-md p-4 shadow-md ${msg.sender === 'user' ? 'bg-primary-600 text-black' : 'bg-white text-neutral-900'}`}>
+                <Card className={`max-w-md p-4 shadow-md ${msg.sender === 'user' ? 'bg-primary-100 text-black' : 'bg-white text-neutral-900'}`}>
                   <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                 </Card>
               </motion.div>
             ))}
           </AnimatePresence>
+          <div ref={chatEndRef} />
         </div>
 
-        {/* Input */}
-        <div className="p-4 border-t border-neutral-200">
+        <div className="p-4 border-t border-neutral-200 bg-white">
           <div className="flex items-center gap-2">
             <Input
               placeholder="Ask your AI assistant..."
