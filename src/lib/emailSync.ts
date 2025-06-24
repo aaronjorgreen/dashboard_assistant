@@ -75,3 +75,7 @@ export class EmailSyncEngine {
       .upsert({ user_id: this.userId, last_history_id: historyId });
   }
 }
+
+export const createEmailSync = (userId: string, onProgress?: (msg: string) => void) => {
+  return new EmailSyncEngine(userId, onProgress);
+} 
