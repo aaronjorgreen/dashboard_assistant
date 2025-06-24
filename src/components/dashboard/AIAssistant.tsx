@@ -93,7 +93,7 @@ export function AIAssistant() {
                 exit={{ opacity: 0, y: -10 }}
                 className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <Card className={`max-w-md p-4 shadow-md ${msg.sender === 'user' ? 'bg-primary-600 text-white' : 'bg-white text-neutral-900'}`}>
+                <Card className={`max-w-md p-4 shadow-md ${msg.sender === 'user' ? 'bg-primary-600 text-black' : 'bg-white text-neutral-900'}`}>
                   <p className={`text-sm ${msg.sender === 'user' ? 'text-white' : 'text-neutral-900'}`}>{msg.content}</p>
                 </Card>
               </motion.div>
