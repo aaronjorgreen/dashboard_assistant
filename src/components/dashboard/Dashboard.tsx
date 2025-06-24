@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Mail, Users, Search, Bell, User, Bot, Sparkles, Menu, X, Shield, LogOut, Mic, Volume2, Settings, ChevronDown
+  Mail, Users, Search, Bell, User, Bot, Sparkles, Mic, Volume2, ChevronDown
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import { useAuth } from '../../hooks/useAuth';
@@ -9,13 +9,11 @@ import { EmailWorkspace } from './EmailWorkspace';
 import { AdminPanel } from './AdminPanel';
 import { AIAssistant } from './AIAssistant';
 import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
 
 export function Dashboard() {
   const { state, dispatch } = useApp();
   const { signOut, isAdmin } = useAuth();
   const [currentView, setCurrentView] = useState<'emails' | 'admin' | 'ai'>('emails');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navigationItems = [
     { id: 'emails', label: 'Email Workspace', icon: Mail },
@@ -29,12 +27,12 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-primary-50/20">
-      {/* Modern Header */}
+    <div className="flex flex-col h-screen bg-gradient-to-br from-neutral-50 via-white to-primary-50/20">
+      {/* Header */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-neutral-200/50 shadow-soft">
         <div className="px-8 py-4">
           <div className="flex items-center justify-between">
-            {/* Logo & Brand */}
+            {/* Brand */}
             <div className="flex items-center space-x-4">
               <div className="relative">
                 <div className="w-12 h-12 bg-gradient-to-br from-primary-600 via-primary-700 to-success-600 rounded-2xl flex items-center justify-center shadow-large">
@@ -52,7 +50,7 @@ export function Dashboard() {
               </div>
             </div>
 
-            {/* Center Search */}
+            {/* Search */}
             <div className="flex-1 max-w-2xl mx-8">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
@@ -64,7 +62,7 @@ export function Dashboard() {
               </div>
             </div>
 
-            {/* Right Actions */}
+            {/* Actions */}
             <div className="flex items-center space-x-3">
               <Button variant="ghost" size="sm" className="p-3 rounded-xl hover:bg-neutral-100">
                 <Mic className="w-5 h-5 text-neutral-600" />
@@ -74,10 +72,10 @@ export function Dashboard() {
               </Button>
               <Button variant="ghost" size="sm" className="p-3 rounded-xl hover:bg-neutral-100 relative">
                 <Bell className="w-5 h-5 text-neutral-600" />
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-error-500 rounded-full"></div>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-error-500 rounded-full" />
               </Button>
-              
-              {/* User Menu */}
+
+              {/* User */}
               <div className="flex items-center space-x-3 pl-3 border-l border-neutral-200">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center shadow-medium">
                   <User className="w-5 h-5 text-white" />
@@ -93,7 +91,7 @@ export function Dashboard() {
         </div>
       </header>
 
-      {/* Navigation Tabs */}
+      {/* Navigation */}
       <nav className="bg-white/60 backdrop-blur-sm border-b border-neutral-200/30">
         <div className="px-8 py-4">
           <div className="flex items-center justify-center">
@@ -101,7 +99,7 @@ export function Dashboard() {
               {navigationItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setCurrentView(item.id as any)}
+                  onClick={() => setCurrentView(item.id as 'emails' | 'admin' | 'ai')}
                   className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
                     currentView === item.id
                       ? 'bg-white text-primary-700 shadow-medium border border-primary-200/50'
@@ -117,9 +115,9 @@ export function Dashboard() {
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="min-h-[calc(100vh-140px)]">
-        <AnimatePresence mode="wait">
+      {/* Main */}
+      <main className="flex-1 overflow-hidden">
+        <AnimatePresence>
           <motion.div
             key={currentView}
             initial={{ opacity: 0, y: 20 }}
