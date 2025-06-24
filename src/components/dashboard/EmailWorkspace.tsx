@@ -21,10 +21,10 @@ export function EmailWorkspace() {
     checkGmailConnection();
   }, [user]);
 
-  const checkGmailConnection = async () => {
+  const checkGmailConnection = () => {
     setIsCheckingConnection(true);
-    const result = await gmailIntegration.checkConnection();
-    setHasGmailConnection(result.success);
+    const isConnected = gmailIntegration.isAuthenticated();
+    setHasGmailConnection(isConnected);
     setIsCheckingConnection(false);
   };
 
