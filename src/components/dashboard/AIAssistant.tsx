@@ -1,5 +1,3 @@
-// FINALIZED AIAssistant.tsx – Fixed layout, scrollable chat, fitted view
-
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, Send, Volume2, Activity } from 'lucide-react';
@@ -81,7 +79,7 @@ export function AIAssistant() {
         </Button>
       </div>
 
-      {/* Main Chat Area */}
+      {/* Main Chat Column */}
       <div className="flex-1 flex flex-col h-full">
         {/* Header */}
         <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
@@ -95,7 +93,7 @@ export function AIAssistant() {
           </div>
         </div>
 
-        {/* Chat Scrollable Messages */}
+        {/* Messages (scrollable only here) */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
           <AnimatePresence>
             {messages.map((msg) => (
@@ -121,8 +119,8 @@ export function AIAssistant() {
           <div ref={chatEndRef} />
         </div>
 
-        {/* Chat Input (Sticky Bottom) */}
-        <div className="p-4 border-t border-neutral-200 bg-white">
+        {/* Sticky input at bottom */}
+        <div className="p-4 border-t border-neutral-200 bg-white shrink-0">
           <div className="flex items-center gap-2">
             <Input
               placeholder="Ask your AI assistant..."
