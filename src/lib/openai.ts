@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true, // Note: In production, API calls should go through your backend
+  dangerouslyAllowBrowser: true, // In production, proxy via backend
 });
 
 export interface AIAnalysis {
@@ -13,7 +13,7 @@ export interface AIAnalysis {
   actionItems: string[];
   suggestedResponse?: string;
   keyTopics: string[];
-  urgency: number; // 1-10 scale
+  urgency: number; // 1–10 scale
 }
 
 export interface EmailContext {
@@ -26,7 +26,7 @@ export interface EmailContext {
 
 export class AIEmailAssistant {
   private static instance: AIEmailAssistant;
-  
+
   static getInstance(): AIEmailAssistant {
     if (!AIEmailAssistant.instance) {
       AIEmailAssistant.instance = new AIEmailAssistant();
@@ -34,21 +34,17 @@ export class AIEmailAssistant {
     return AIEmailAssistant.instance;
   }
 
-  async analyzeEmail(emailContext: EmailContext): Promise<AIAnalysis> {
+  async analyzeEmail(email: EmailContext): Promise<AIAnalysis> {
     try {
-      const prompt = this.buildAnalysisPrompt(emailContext);
-      
+      const prompt = this.buildAnalysisPrompt(email);
       const completion = await openai.chat.completions.create({
-        model: "gpt-4-turbo-preview",
+        model: 'gpt-4-turbo-preview',
         messages: [
           {
-            role: "system",
-            content: `You are an advanced AI email assistant for ISDC Foods. You analyze emails and provide intelligent insights, summaries, and recommendations. Always respond in JSON format with the exact structure requested.`
+            role: 'system',
+            content: `You are the AI Email Assistant for Vertex Vista. Your job is to analyze incoming emails and return a clear JSON with: summary, sentiment, priority, key topics, action items, urgency (1–10), and a suggested reply. Respond only in valid JSON.`,
           },
-          {
-            role: "user",
-            content: prompt
-          }
+          { role: 'user', content: prompt },
         ],
         temperature: 0.3,
         max_tokens: 1000,
@@ -56,146 +52,141 @@ export class AIEmailAssistant {
 
       const response = completion.choices[0]?.message?.content;
       if (!response) throw new Error('No response from OpenAI');
-
       return JSON.parse(response) as AIAnalysis;
-    } catch (error) {
-      console.error('Error analyzing email:', error);
-      return this.getFallbackAnalysis(emailContext);
+    } catch (err) {
+      console.error('Error analyzing email:', err);
+      return this.getFallbackAnalysis(email);
     }
   }
 
-  async generateResponse(emailContext: EmailContext, tone: 'professional' | 'friendly' | 'formal' = 'professional'): Promise<string> {
+  async generateResponse(
+    email: EmailContext,
+    tone: 'professional' | 'friendly' | 'formal' = 'professional'
+  ): Promise<string> {
     try {
       const prompt = `
-        Generate a ${tone} email response to the following email:
-        
-        Subject: ${emailContext.subject}
-        From: ${emailContext.sender}
-        Body: ${emailContext.body}
-        
-        Context: You are responding on behalf of someone at ISDC Foods. 
-        Keep the response concise, relevant, and maintain the appropriate tone.
-        Do not include subject line, just the email body.
-      `;
+Generate a ${tone} email reply to:
+Subject: ${email.subject}
+From: ${email.sender}
+Body: ${email.body}
 
+Reply on behalf of a team member at Vertex Vista. Keep it short, polite, and relevant. No need for subject line.
+      `;
       const completion = await openai.chat.completions.create({
-        model: "gpt-4-turbo-preview",
+        model: 'gpt-4-turbo-preview',
         messages: [
           {
-            role: "system",
-            content: "You are a professional email assistant for ISDC Foods. Generate appropriate email responses that are clear, concise, and business-appropriate."
+            role: 'system',
+            content:
+              'You are the AI Email Assistant for Vertex Vista. Your job is to write short, polite, and relevant email replies with a professional tone.',
           },
-          {
-            role: "user",
-            content: prompt
-          }
+          { role: 'user', content: prompt },
         ],
-        temperature: 0.7,
+        temperature: 0.6,
         max_tokens: 500,
       });
 
-      return completion.choices[0]?.message?.content || 'I apologize, but I was unable to generate a response at this time.';
-    } catch (error) {
-      console.error('Error generating response:', error);
-      return 'Thank you for your email. I will review this and get back to you shortly.';
+      return completion.choices[0]?.message?.content || 'Unable to generate reply.';
+    } catch (err) {
+      console.error('Error generating response:', err);
+      return 'Thank you for your email. I’ll follow up shortly.';
     }
   }
 
   async summarizeEmails(emails: EmailContext[]): Promise<string> {
     try {
-      const emailSummaries = emails.map(email => 
-        `From: ${email.sender}\nSubject: ${email.subject}\nBody: ${email.body.substring(0, 200)}...`
-      ).join('\n\n---\n\n');
+      const summaryString = emails
+        .map(
+          (e) =>
+            `From: ${e.sender}\nSubject: ${e.subject}\nBody: ${e.body.substring(0, 200)}...`
+        )
+        .join('\n\n---\n\n');
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4-turbo-preview",
+        model: 'gpt-4-turbo-preview',
         messages: [
           {
-            role: "system",
-            content: "You are an AI assistant that creates concise, actionable summaries of multiple emails. Focus on key insights, action items, and important information."
+            role: 'system',
+            content:
+              'You are the AI Email Assistant for Vertex Vista. Your task is to give a short, sharp summary of unread emails: highlight important senders, urgent topics, or action items. Be concise.',
           },
           {
-            role: "user",
-            content: `Please provide a comprehensive summary of these emails:\n\n${emailSummaries}`
-          }
+            role: 'user',
+            content: `Summarize these unread emails:\n\n${summaryString}`,
+          },
         ],
-        temperature: 0.3,
+        temperature: 0.4,
         max_tokens: 800,
       });
 
-      return completion.choices[0]?.message?.content || 'Unable to generate summary at this time.';
-    } catch (error) {
-      console.error('Error summarizing emails:', error);
-      return 'Unable to generate summary at this time.';
+      return completion.choices[0]?.message?.content || 'No summary generated.';
+    } catch (err) {
+      console.error('Error summarizing emails:', err);
+      return 'Unable to generate summary.';
     }
   }
 
   async chatWithAI(message: string, context?: string): Promise<string> {
     try {
       const systemPrompt = `
-        You are an advanced AI assistant for ISDC Foods email management. You help with:
-        - Email analysis and insights
-        - Drafting responses
-        - Managing email workflows
-        - Business intelligence from email data
-        - Scheduling and task management
-        
-        Be helpful, professional, and provide actionable insights.
-        ${context ? `\n\nCurrent context: ${context}` : ''}
+You are the AI Email Assistant for Vertex Vista. Keep responses short, smart, and conversational — no essays. Help with:
+- Inbox prioritization
+- Drafting replies
+- Summarizing emails
+- Extracting tasks or scheduling needs
+- Offering business insights from patterns
+
+Answer like a helpful assistant. Speak clearly and don’t over-elaborate.
+${context ? `Context: ${context}` : ''}
       `;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4-turbo-preview",
+        model: 'gpt-4-turbo-preview',
         messages: [
-          {
-            role: "system",
-            content: systemPrompt
-          },
-          {
-            role: "user",
-            content: message
-          }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: message },
         ],
-        temperature: 0.7,
-        max_tokens: 1000,
+        temperature: 0.6,
+        max_tokens: 800,
       });
 
-      return completion.choices[0]?.message?.content || 'I apologize, but I was unable to process your request at this time.';
-    } catch (error) {
-      console.error('Error in AI chat:', error);
-      return 'I apologize, but I was unable to process your request at this time. Please try again.';
+      return completion.choices[0]?.message?.content || 'No answer generated.';
+    } catch (err) {
+      console.error('Error in AI chat:', err);
+      return 'Sorry, I wasn’t able to help with that just now.';
     }
   }
 
-  private buildAnalysisPrompt(emailContext: EmailContext): string {
+  private buildAnalysisPrompt(email: EmailContext): string {
     return `
-      Analyze this email and provide insights in the following JSON format:
-      {
-        "summary": "Brief 2-3 sentence summary",
-        "sentiment": "positive|negative|neutral",
-        "priority": "high|medium|low",
-        "actionItems": ["action1", "action2"],
-        "suggestedResponse": "Brief suggested response if needed",
-        "keyTopics": ["topic1", "topic2"],
-        "urgency": 5
-      }
-      
-      Email to analyze:
-      Subject: ${emailContext.subject}
-      From: ${emailContext.sender}
-      Body: ${emailContext.body}
-      Date: ${emailContext.timestamp.toISOString()}
+Analyze the email below and return a response in this JSON format:
+{
+  "summary": "",
+  "sentiment": "positive|neutral|negative",
+  "priority": "high|medium|low",
+  "actionItems": [],
+  "suggestedResponse": "",
+  "keyTopics": [],
+  "urgency": 5
+}
+
+Email:
+Subject: ${email.subject}
+From: ${email.sender}
+Body: ${email.body}
+Date: ${email.timestamp.toISOString()}
     `;
   }
 
-  private getFallbackAnalysis(emailContext: EmailContext): AIAnalysis {
+  private getFallbackAnalysis(email: EmailContext): AIAnalysis {
     return {
-      summary: `Email from ${emailContext.sender} regarding ${emailContext.subject}`,
+      summary: `Email from ${email.sender} about "${email.subject}"`,
       sentiment: 'neutral',
       priority: 'medium',
-      actionItems: ['Review email content', 'Determine appropriate response'],
-      keyTopics: ['General correspondence'],
-      urgency: 5
+      actionItems: ['Review email', 'Consider response'],
+      suggestedResponse: 'Thanks for the update. I’ll take a look and follow up shortly.',
+      keyTopics: ['general'],
+      urgency: 5,
     };
   }
 }
